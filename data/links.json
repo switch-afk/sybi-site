@@ -1,0 +1,42 @@
+[
+  {
+    "id": "seed-x",
+    "label": "X",
+    "url": "https://x.com/sybimeta",
+    "icon": "x",
+    "visible": true,
+    "order": 0
+  },
+  {
+    "id": "seed-github",
+    "label": "GitHub",
+    "url": "https://github.com/switch-afk",
+    "icon": "github",
+    "visible": true,
+    "order": 1
+  },
+  {
+    "id": "seed-discord",
+    "label": "Discord",
+    "url": "https://discord.gg/Jd5JPkSN59",
+    "icon": "discord",
+    "visible": true,
+    "order": 2
+  },
+  {
+    "id": "seed-telegram",
+    "label": "Telegram",
+    "url": "https://t.me/sybi_meta",
+    "icon": "telegram",
+    "visible": true,
+    "order": 3
+  },
+  {
+    "id": "cac5a96c-c59f-4cdb-a1da-2cd5ca06a66a",
+    "label": "Twitch",
+    "url": "https://twitch.tv/sybimeta",
+    "icon": "twitch",
+    "visible": false,
+    "order": 4
+  }
+]

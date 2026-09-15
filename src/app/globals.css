@@ -1,0 +1,282 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-press);
+  --font-mono: var(--font-vt);
+  --font-heading: var(--font-press);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+
+  /* Arcade palette */
+  --color-coin: var(--coin);
+  --color-void: var(--void);
+  --color-phosphor: var(--phosphor);
+  --color-terminal: var(--terminal);
+  --color-danger: var(--danger);
+  --color-slate: var(--slate);
+
+  /* Nothing rounds in an 8-bit UI. */
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+  --radius-3xl: 0px;
+  --radius-4xl: 0px;
+}
+
+:root {
+  --coin: #eab308;
+  --void: #07070c;
+  --phosphor: #f4f4ef;
+  --terminal: #3fd2ff;
+  --danger: #e83b3b;
+  --slate: #1a1a2b;
+
+  --background: var(--void);
+  --foreground: var(--phosphor);
+  --card: var(--slate);
+  --card-foreground: var(--phosphor);
+  --popover: var(--slate);
+  --popover-foreground: var(--phosphor);
+  --primary: var(--coin);
+  --primary-foreground: var(--void);
+  --secondary: #2c2c44;
+  --secondary-foreground: var(--phosphor);
+  --muted: #2c2c44;
+  --muted-foreground: #8a8aa8;
+  --accent: var(--terminal);
+  --accent-foreground: var(--void);
+  --destructive: var(--danger);
+  --border: #3a3a5c;
+  --input: #3a3a5c;
+  --ring: var(--coin);
+  --chart-1: var(--coin);
+  --chart-2: var(--terminal);
+  --chart-3: var(--danger);
+  --chart-4: #7ee787;
+  --chart-5: #b57bff;
+  --radius: 0px;
+  --sidebar: var(--slate);
+  --sidebar-foreground: var(--phosphor);
+  --sidebar-primary: var(--coin);
+  --sidebar-primary-foreground: var(--void);
+  --sidebar-accent: #2c2c44;
+  --sidebar-accent-foreground: var(--phosphor);
+  --sidebar-border: #3a3a5c;
+  --sidebar-ring: var(--coin);
+}
+
+.dark {
+  --background: var(--void);
+  --foreground: var(--phosphor);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    border-radius: 0 !important;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    -webkit-font-smoothing: none;
+    text-rendering: geometricPrecision;
+  }
+
+  html {
+    font-family: var(--font-press), monospace;
+  }
+
+  /* Keyboard focus stays obvious — the menu is arrow-key driven. */
+  :focus-visible {
+    outline: 3px solid var(--coin);
+    outline-offset: 3px;
+  }
+
+  ::selection {
+    background: var(--coin);
+    color: var(--void);
+  }
+}
+
+@layer components {
+  /* NES-style chunky frame: four offset blocks, corners left open. */
+  .pixel-frame {
+    --px: 4px;
+    --px-color: var(--coin);
+    position: relative;
+    box-shadow:
+      0 calc(var(--px) * -1) 0 0 var(--px-color),
+      0 var(--px) 0 0 var(--px-color),
+      calc(var(--px) * -1) 0 0 0 var(--px-color),
+      var(--px) 0 0 0 var(--px-color);
+  }
+
+  .pixel-frame-thin {
+    --px: 3px;
+  }
+
+  .pixel-drop {
+    filter: drop-shadow(6px 6px 0 rgba(0, 0, 0, 0.85));
+  }
+
+  /* Hard stepped shadow, no blur — the way a sprite logo is shaded. */
+  .pixel-text-shadow {
+    text-shadow:
+      4px 4px 0 var(--void),
+      8px 8px 0 rgba(234, 179, 8, 0.28);
+  }
+
+  .pixelated {
+    image-rendering: pixelated;
+  }
+
+  .scanlines::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 40;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0) 0px,
+      rgba(0, 0, 0, 0) 2px,
+      rgba(0, 0, 0, 0.2) 3px,
+      rgba(0, 0, 0, 0.2) 4px
+    );
+  }
+
+  .crt-vignette::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 30;
+    background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.7) 100%);
+  }
+}
+
+@keyframes blink-step {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes sprite-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes glitch-shift {
+  0%,
+  92%,
+  100% {
+    transform: translate(0, 0);
+  }
+  93% {
+    transform: translate(-3px, 1px);
+  }
+  95% {
+    transform: translate(3px, -1px);
+  }
+  97% {
+    transform: translate(-2px, 0);
+  }
+}
+
+@keyframes coin-flip {
+  0%,
+  100% {
+    transform: scaleX(1);
+  }
+  50% {
+    transform: scaleX(0.15);
+  }
+}
+
+@keyframes power-flicker {
+  0% {
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.7;
+  }
+  18% {
+    opacity: 0.1;
+  }
+  26% {
+    opacity: 1;
+  }
+  32% {
+    opacity: 0.35;
+  }
+  40%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
