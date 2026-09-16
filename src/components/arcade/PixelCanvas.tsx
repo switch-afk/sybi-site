@@ -132,10 +132,8 @@ export default function PixelCanvas() {
         drawSprite(CRITTER, critter.x, critter.y + hop, critter.tint);
       }
 
-      // Single CRT refresh bar sweeping down.
-      const sweep = Math.round((frame * 0.6) % (height + 60)) - 30;
-      ctx.fillStyle = "rgba(244,244,239,0.035)";
-      ctx.fillRect(0, sweep, width, 8);
+      // A full-width sweep bar used to run here, but at this scale it read as a
+      // rendering seam across the page rather than a CRT effect.
 
       animationId = requestAnimationFrame(draw);
     };

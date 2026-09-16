@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import PixelCanvas from "./PixelCanvas";
 import PixelAvatar from "./PixelAvatar";
+import ArcadeGame from "./ArcadeGame";
 import { iconFor } from "./icons";
 import { play, SFX_STORAGE_KEY } from "./sfx";
 import type { LinkItem } from "@/lib/links";
@@ -60,9 +61,22 @@ export default function ArcadeScene({ links }: { links: LinkItem[] }) {
   const [typed, setTyped] = useState("");
   const [roleIndex, setRoleIndex] = useState(0);
   const [deleting, setDeleting] = useState(false);
+  const [canPlay, setCanPlay] = useState(false);
+  const [playing, setPlaying] = useState(false);
+  const [origin, setOrigin] = useState({ x: 0, y: 0 });
   const itemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
 
   const blip = useCallback((cue: string) => play(cue, sfxOn), [sfxOn]);
+
+  // The game needs a mouse, so touch devices never load it — width alone
+  // would let touch laptops and tablets through.
+  useEffect(() => {
+    const query = window.matchMedia("(min-width: 768px) and (pointer: fine)");
+    const sync = () => setCanPlay(query.matches);
+    sync();
+    query.addEventListener("change", sync);
+    return () => query.removeEventListener("change", sync);
+  }, []);
 
   // Restore the sound preference; it stays off until someone asks for it.
   useEffect(() => {
@@ -146,7 +160,7 @@ export default function ArcadeScene({ links }: { links: LinkItem[] }) {
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (!booted) return;
+      if (!booted || playing) return;
       if (event.key === "ArrowRight") {
         event.preventDefault();
         move(1);
@@ -163,7 +177,16 @@ export default function ArcadeScene({ links }: { links: LinkItem[] }) {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [move, booted]);
+  }, [move, booted, playing]);
+
+  const startGame = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (!canPlay || playing || !booted) return;
+    // Anything interactive keeps its normal behaviour; only dead space starts it.
+    if ((event.target as HTMLElement).closest("a, button, input")) return;
+    setOrigin({ x: event.clientX, y: event.clientY });
+    setPlaying(true);
+    play("coin", sfxOn);
+  };
 
   const rows = useMemo(
     () =>
@@ -175,7 +198,10 @@ export default function ArcadeScene({ links }: { links: LinkItem[] }) {
   );
 
   return (
-    <div className="scanlines crt-vignette relative min-h-screen w-full overflow-hidden bg-void text-phosphor">
+    <div
+      onClick={startGame}
+      className="scanlines crt-vignette relative min-h-screen w-full overflow-hidden bg-void text-phosphor"
+    >
       {/* The boot sequence sits on top rather than replacing the page, so the
           links are in the HTML from the first byte for crawlers and no-JS. */}
       {!booted ? (
@@ -198,7 +224,9 @@ export default function ArcadeScene({ links }: { links: LinkItem[] }) {
       <PixelCanvas />
 
       <div
-        className="relative z-20 flex min-h-screen flex-col"
+        className={`relative z-20 flex min-h-screen flex-col transition-opacity duration-300 ${
+          playing ? "pointer-events-none opacity-15" : "opacity-100"
+        }`}
         style={booted ? { animation: "power-flicker 0.7s steps(8, end) 1" } : undefined}
       >
         {/* Status bar */}
@@ -312,9 +340,15 @@ export default function ArcadeScene({ links }: { links: LinkItem[] }) {
         </main>
 
         <footer className="px-4 pb-6 text-center text-[8px] text-phosphor/30 sm:px-8 sm:text-[9px]">
-          <span style={{ animation: "blink-step 2s steps(1, end) infinite" }}>INSERT COIN</span>
+          <span style={{ animation: "blink-step 2s steps(1, end) infinite" }}>
+            {canPlay ? "INSERT COIN \u2014 CLICK ANYWHERE TO PLAY" : "INSERT COIN"}
+          </span>
         </footer>
       </div>
+
+      {playing ? (
+        <ArcadeGame sfxOn={sfxOn} origin={origin} onExit={() => setPlaying(false)} />
+      ) : null}
     </div>
   );
 }
