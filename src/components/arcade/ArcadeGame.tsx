@@ -6,7 +6,6 @@ import { play } from "./sfx";
 /** Same trick as the background: draw into a buffer a quarter of the viewport
  *  and upscale with smoothing off, so every pixel is a real 4x4 block. */
 const SCALE = 4;
-const HIGH_SCORE_KEY = "sybi-highscore";
 
 const GRUNT = [
   "..X..X..",
@@ -180,24 +179,39 @@ export default function ArcadeGame({
 
   const blip = useCallback((cue: string) => play(cue, sfxOn), [sfxOn]);
 
+  // The best score is shared by everyone who plays, so it comes from the server
+  // rather than this browser.
   useEffect(() => {
-    try {
-      setBest(Number(window.localStorage.getItem(HIGH_SCORE_KEY)) || 0);
-    } catch {
-      /* private mode */
-    }
+    let cancelled = false;
+    fetch("/api/highscore", { cache: "no-store" })
+      .then((response) => response.json())
+      .then((data) => {
+        if (!cancelled) setBest(Number(data?.score) || 0);
+      })
+      .catch(() => {
+        /* offline — the HUD just shows 0 until the next load */
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const saveBest = useCallback((value: number) => {
-    setBest((current) => {
-      if (value <= current) return current;
-      try {
-        window.localStorage.setItem(HIGH_SCORE_KEY, String(value));
-      } catch {
-        /* private mode */
-      }
-      return value;
-    });
+    // Submit regardless of the local figure; the server decides what's highest,
+    // since another player may have beaten it mid-game.
+    fetch("/api/highscore", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ score: value }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        const confirmed = Number(data?.score);
+        if (Number.isFinite(confirmed)) setBest(confirmed);
+      })
+      .catch(() => {
+        setBest((current) => Math.max(current, value));
+      });
   }, []);
 
   const makeEnemy = useCallback((kind: Kind, wave: number, width: number): Enemy => {
@@ -595,7 +609,7 @@ export default function ArcadeGame({
       <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between p-4 text-[9px] text-phosphor sm:p-6 sm:text-[10px]">
         <div className="space-y-2">
           <p className="text-coin">SCORE {String(score).padStart(6, "0")}</p>
-          <p className="text-phosphor/45">BEST {String(best).padStart(6, "0")}</p>
+          <p className="text-phosphor/45">WORLD {String(best).padStart(6, "0")}</p>
           {multiplier > 1 ? <p className="text-terminal">COMBO x{multiplier}</p> : null}
         </div>
 
@@ -675,8 +689,11 @@ export default function ArcadeGame({
             <h2 className="mb-6 text-sm text-danger">GAME OVER</h2>
             <p className="mb-2 text-[10px] text-coin">SCORE {String(score).padStart(6, "0")}</p>
             <p className="mb-2 text-[9px] text-phosphor/45">
-              BEST {String(Math.max(best, score)).padStart(6, "0")}
+              WORLD BEST {String(best).padStart(6, "0")}
             </p>
+            {score >= best && score > 0 ? (
+              <p className="mb-2 text-[9px] text-coin">NEW RECORD</p>
+            ) : null}
             <p className="mb-6 text-[9px] text-phosphor/35">REACHED WAVE {wave}</p>
             <div className="flex flex-col gap-3">
               <button
