@@ -72,7 +72,7 @@ from its icon and shows as the hover tooltip and the screen-reader label.
 whole row. Enter opens the highlighted one. The highlighted block gets a yellow
 frame and a drop shadow.
 
-**Sound** is off by default. The toggle sits in the top-right status bar and the
+**Sound** is on by default. The toggle sits in the top-right status bar and the
 choice is remembered per browser. All effects are square waves generated in
 WebAudio — there are no audio files in the repo.
 

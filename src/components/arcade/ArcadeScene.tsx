@@ -57,7 +57,7 @@ export default function ArcadeScene({ links }: { links: LinkItem[] }) {
   const [booted, setBooted] = useState(false);
   const [bootStep, setBootStep] = useState(0);
   const [selected, setSelected] = useState(0);
-  const [sfxOn, setSfxOn] = useState(false);
+  const [sfxOn, setSfxOn] = useState(true);
   const [typed, setTyped] = useState("");
   const [roleIndex, setRoleIndex] = useState(0);
   const [deleting, setDeleting] = useState(false);
@@ -78,12 +78,14 @@ export default function ArcadeScene({ links }: { links: LinkItem[] }) {
     return () => query.removeEventListener("change", sync);
   }, []);
 
-  // Restore the sound preference; it stays off until someone asks for it.
+  // Sound is on by default; only a stored choice overrides that, so anyone who
+  // has muted it stays muted.
   useEffect(() => {
     try {
-      setSfxOn(window.localStorage.getItem(SFX_STORAGE_KEY) === "on");
+      const stored = window.localStorage.getItem(SFX_STORAGE_KEY);
+      if (stored) setSfxOn(stored === "on");
     } catch {
-      /* private mode — leave sound off */
+      /* private mode — keep the default */
     }
   }, []);
 
