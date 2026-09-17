@@ -14,6 +14,9 @@ const vt323 = VT323({
   weight: "400",
   subsets: ["latin"],
   display: "swap",
+  // Only the admin inputs use this face, so preloading it on the home page
+  // triggers "preloaded but not used" warnings.
+  preload: false,
 });
 
 const SITE_URL = "https://sybimeta.xyz";
