@@ -19,13 +19,8 @@ cd sybi-site
 npm install
 ```
 
-Create your environment file:
-
-```bash
-cp .env.example .env.local
-```
-
-Open `.env.local` and set a password:
+Create a file named `.env.local` in the project root and put your admin password
+in it:
 
 ```
 ADMIN_PASSWORD=pick-something-strong
@@ -39,11 +34,6 @@ npm run dev
 
 - <http://localhost:3000> — the site
 - <http://localhost:3000/admin> — the link manager
-
-> On Windows, if PowerShell blocks `npm` with a script execution error, use
-> `npm.cmd run dev` instead, or run
-> `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned` once
-> and reopen the terminal.
 
 ---
 
@@ -65,14 +55,6 @@ One variable, and the app won't start the admin panel without it.
 | Variable | Purpose |
 |---|---|
 | `ADMIN_PASSWORD` | The password for `/admin`. |
-
-`.env.local` is gitignored, so it never reaches GitHub and doesn't travel with a
-clone — you create it fresh on each machine. `.env.example` is committed as the
-reminder of what belongs in it.
-
-The login cookie is an HMAC signed with the password itself, so **changing the
-password immediately signs out every existing session**. The cookie is
-`httpOnly`, `sameSite=lax`, and `secure` in production.
 
 ---
 
@@ -171,24 +153,6 @@ pauses automatically when the tab loses focus.
 
 ---
 
-## Where data lives
-
-No database. Two JSON files in `data/`, both written atomically (temp file then
-rename), so a crash can't leave a half-written file.
-
-| File | Contents | In git? |
-|---|---|---|
-| `data/links.json` | Your links, with order and visibility. | Yes — it's your content. |
-| `data/highscore.json` | The global high score. Created on first play. | No — written at runtime. |
-
-Because `links.json` is tracked but also written by the admin panel, it can drift
-between your machine and the server. See the note under updating below.
-
-The storage layer is isolated in `src/lib/links.ts` and `src/lib/highscore.ts` —
-nothing else in the app touches the filesystem.
-
----
-
 ## Project structure
 
 ```
@@ -250,13 +214,6 @@ git stash pop
 **Run a single PM2 instance.** Don't use cluster mode (`pm2 start -i max`) —
 links and scores live in JSON files, and multiple workers writing to them will
 clobber each other.
-
-The `data/` directory must be writable by whoever PM2 runs as. If it isn't, the
-site loads fine and every save silently fails:
-
-```bash
-touch data/links.json && echo "writable"
-```
 
 ---
 
