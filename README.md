@@ -1,4 +1,4 @@
-# sybimeta-site
+# sybi-site
 
 Personal links page for [sybimeta.xyz](https://sybimeta.xyz), built as an 8-bit
 arcade screen. A pixel-art hero, a grid of icon-only link blocks, a
@@ -14,8 +14,8 @@ Fonts are Press Start 2P and VT323 via `next/font/google`. Icons come from
 ## Quick start
 
 ```bash
-git clone https://github.com/switch-afk/sybimeta-site.git
-cd sybimeta-site
+git clone https://github.com/switch-afk/sybi-site.git
+cd sybi-site
 npm install
 ```
 
