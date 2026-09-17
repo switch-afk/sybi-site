@@ -221,7 +221,7 @@ export default function ArcadeScene({ links }: { links: LinkItem[] }) {
         </div>
       ) : null}
 
-      <PixelCanvas />
+      <PixelCanvas hideSprites={playing} />
 
       <div
         className={`relative z-20 flex min-h-screen flex-col transition-opacity duration-300 ${

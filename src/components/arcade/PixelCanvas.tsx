@@ -21,8 +21,14 @@ type Star = { x: number; y: number; size: number; speed: number; hue: 0 | 1 };
 type Critter = { x: number; y: number; vx: number; vy: number; step: number; tint: string };
 type Block = { x: number; y: number; speed: number; length: number };
 
-export default function PixelCanvas() {
+export default function PixelCanvas({ hideSprites = false }: { hideSprites?: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  // The loop can't read the prop directly, so it reads this instead.
+  const hideRef = useRef(hideSprites);
+
+  useEffect(() => {
+    hideRef.current = hideSprites;
+  }, [hideSprites]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -82,6 +88,9 @@ export default function PixelCanvas() {
 
     let frame = 0;
     let animationId = 0;
+    // Background critters look identical to the game's grunts, so they fade
+    // out during play rather than sitting there as unshootable decoys.
+    let critterFade = 1;
 
     const draw = () => {
       frame++;
@@ -121,15 +130,23 @@ export default function PixelCanvas() {
       }
 
       // Critters march two frames per second, the way a sprite sheet would.
-      for (const critter of critters) {
-        critter.x += critter.vx;
-        critter.y += critter.vy;
-        if (critter.x < -10) critter.x = width + 10;
-        if (critter.x > width + 10) critter.x = -10;
-        if (critter.y < -10) critter.y = height + 10;
-        if (critter.y > height + 10) critter.y = -10;
-        const hop = Math.floor(frame / 30) % 2 === 0 ? 0 : 1;
-        drawSprite(CRITTER, critter.x, critter.y + hop, critter.tint);
+      const target = hideRef.current ? 0 : 1;
+      if (critterFade < target) critterFade = Math.min(target, critterFade + 0.1);
+      if (critterFade > target) critterFade = Math.max(target, critterFade - 0.1);
+
+      if (critterFade > 0) {
+        ctx.globalAlpha = critterFade;
+        for (const critter of critters) {
+          critter.x += critter.vx;
+          critter.y += critter.vy;
+          if (critter.x < -10) critter.x = width + 10;
+          if (critter.x > width + 10) critter.x = -10;
+          if (critter.y < -10) critter.y = height + 10;
+          if (critter.y > height + 10) critter.y = -10;
+          const hop = Math.floor(frame / 30) % 2 === 0 ? 0 : 1;
+          drawSprite(CRITTER, critter.x, critter.y + hop, critter.tint);
+        }
+        ctx.globalAlpha = 1;
       }
 
       // A full-width sweep bar used to run here, but at this scale it read as a
