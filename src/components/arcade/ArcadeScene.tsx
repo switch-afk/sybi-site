@@ -5,7 +5,7 @@ import PixelCanvas from "./PixelCanvas";
 import PixelAvatar from "./PixelAvatar";
 import ArcadeGame from "./ArcadeGame";
 import { iconFor } from "./icons";
-import { play, SFX_STORAGE_KEY } from "./sfx";
+import { play, unlockAudio, SFX_STORAGE_KEY } from "./sfx";
 import type { LinkItem } from "@/lib/links";
 
 const ROLES = ["DIGITAL LIBERATOR", "REALITY ARCHITECT"];
@@ -76,6 +76,20 @@ export default function ArcadeScene({ links }: { links: LinkItem[] }) {
     sync();
     query.addEventListener("change", sync);
     return () => query.removeEventListener("change", sync);
+  }, []);
+
+  // Open the audio channel on the very first gesture of any kind, so hover
+  // blips work from then on instead of staying silent until a click lands.
+  useEffect(() => {
+    const open = () => unlockAudio();
+    window.addEventListener("pointerdown", open, { once: true });
+    window.addEventListener("keydown", open, { once: true });
+    window.addEventListener("touchstart", open, { once: true });
+    return () => {
+      window.removeEventListener("pointerdown", open);
+      window.removeEventListener("keydown", open);
+      window.removeEventListener("touchstart", open);
+    };
   }, []);
 
   // Sound is on by default; only a stored choice overrides that, so anyone who

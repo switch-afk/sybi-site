@@ -22,6 +22,7 @@ const CUES: Record<string, Tone[]> = {
 };
 
 let context: AudioContext | null = null;
+let unlocked = false;
 
 function ensureContext(): AudioContext | null {
   if (typeof window === "undefined") return null;
@@ -54,6 +55,30 @@ export function play(cue: keyof typeof CUES | string, enabled: boolean) {
     osc.start(offset);
     osc.stop(offset + tone.length);
     offset += tone.length;
+  }
+}
+
+/** Browsers refuse to produce audio until the page has had a real user gesture
+ *  — a click, a key press or a tap. Hovering doesn't count, so the first hover
+ *  blip would otherwise be silent. This runs on the first genuine gesture and
+ *  opens the audio channel, so everything after it makes sound.
+ *
+ *  There is no way to start audio before any interaction; that restriction is
+ *  the whole point of the policy. */
+export function unlockAudio() {
+  const ctx = ensureContext();
+  if (!ctx || unlocked) return;
+
+  // iOS needs something to actually play during the gesture, not just a resume.
+  try {
+    const buffer = ctx.createBuffer(1, 1, 22050);
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.connect(ctx.destination);
+    source.start(0);
+    unlocked = true;
+  } catch {
+    /* nothing to do — the next gesture will try again */
   }
 }
 
