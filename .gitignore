@@ -43,3 +43,8 @@ next-env.d.ts
 
 # written at runtime by the game
 data/highscore.json
+
+# discord bot (lives in bot/, its own node_modules + runtime data)
+bot/node_modules
+bot/data/*.json
+!bot/data/.gitkeep

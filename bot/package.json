@@ -1,0 +1,19 @@
+{
+  "name": "sybi-devnet-bot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Discord bot that gives devnet SOL and lets users create devnet SPL tokens, for sybimeta.xyz",
+  "main": "src/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/index.js",
+    "deploy-commands": "node src/deploy-commands.js"
+  },
+  "dependencies": {
+    "@solana/spl-token": "^0.4.9",
+    "@solana/web3.js": "^1.95.3",
+    "bs58": "^5.0.0",
+    "discord.js": "^14.16.3",
+    "dotenv": "^16.4.5"
+  }
+}
