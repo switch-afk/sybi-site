@@ -1,6 +1,4 @@
-// Reads the repo's root .env instead of a separate bot/.env, since
-// everything lives in one repo now.
-require("dotenv").config({ path: require("path").join(__dirname, "..", "..", ".env") });
+require("dotenv").config();
 const { Client, GatewayIntentBits, Collection, MessageFlags } = require("discord.js");
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });

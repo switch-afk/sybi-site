@@ -1,4 +1,4 @@
-require("dotenv").config({ path: require("path").join(__dirname, "..", "..", ".env") });
+require("dotenv").config();
 const { REST, Routes } = require("discord.js");
 const faucet = require("./commands/faucet");
 const createtoken = require("./commands/createtoken");
