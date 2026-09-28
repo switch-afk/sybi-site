@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import PixelCanvas from "./PixelCanvas";
 import PixelAvatar from "./PixelAvatar";
 import ArcadeGame from "./ArcadeGame";
-import DevnetVault from "./DevnetVault";
 import { iconFor } from "./icons";
 import { play, unlockAudio, SFX_STORAGE_KEY } from "./sfx";
 import type { LinkItem } from "@/lib/links";
@@ -342,8 +341,6 @@ export default function ArcadeScene({ links }: { links: LinkItem[] }) {
               </ul>
             )}
           </nav>
-
-          <DevnetVault />
 
           <div className="flex items-center gap-4 text-[8px] text-phosphor/35 sm:text-[9px]">
             <span className="flex items-center gap-2">
