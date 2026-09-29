@@ -354,7 +354,7 @@ export default function ArcadeScene({ links }: { links: LinkItem[] }) {
           </div>
 
           {/* Copy the Solana address */}
-          <div className="-mt-2 flex flex-col items-center gap-3 sm:-mt-3">
+          <div className="relative -mb-1 -mt-2 flex flex-col items-center sm:-mb-2 sm:-mt-3">
             <button
               type="button"
               onClick={copyAddress}
@@ -373,7 +373,7 @@ export default function ArcadeScene({ links }: { links: LinkItem[] }) {
             </button>
             <span
               aria-live="polite"
-              className="h-3 text-[8px] text-terminal sm:text-[9px]"
+              className="pointer-events-none absolute left-1/2 top-full mt-2 -translate-x-1/2 whitespace-nowrap text-[8px] text-terminal sm:text-[9px]"
             >
               {copied ? "ADDRESS COPIED" : ""}
             </span>
