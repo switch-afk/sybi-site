@@ -10,6 +10,7 @@ import type { LinkItem } from "@/lib/links";
 
 const ROLES = ["DIGITAL LIBERATOR", "REALITY ARCHITECT"];
 const HANDLE = "@sybimeta";
+const SOL_ADDRESS = "sybiK3ywM9ZiYH7xBiyRibJivoys2fZDHrYYEfiC8hw";
 const COLUMNS = 4;
 
 const BOOT_LINES = [
@@ -53,6 +54,34 @@ function EnterGlyph() {
   );
 }
 
+/** Two overlapping sheets, drawn pixel by pixel to match the rest of the UI. */
+function CopyGlyph() {
+  return (
+    <svg viewBox="0 0 11 11" aria-hidden className="size-5 shrink-0 fill-current sm:size-6">
+      <rect x="4" y="0" width="7" height="1" />
+      <rect x="4" y="1" width="1" height="6" />
+      <rect x="10" y="1" width="1" height="6" />
+      <rect x="4" y="6" width="7" height="1" />
+      <rect x="0" y="4" width="1" height="7" />
+      <rect x="1" y="4" width="3" height="1" />
+      <rect x="1" y="10" width="7" height="1" />
+      <rect x="7" y="7" width="1" height="4" />
+    </svg>
+  );
+}
+
+function CheckGlyph() {
+  return (
+    <svg viewBox="0 0 11 11" aria-hidden className="size-5 shrink-0 fill-current sm:size-6">
+      <rect x="9" y="2" width="2" height="2" />
+      <rect x="7" y="4" width="2" height="2" />
+      <rect x="5" y="6" width="2" height="2" />
+      <rect x="3" y="7" width="2" height="2" />
+      <rect x="1" y="5" width="2" height="2" />
+    </svg>
+  );
+}
+
 export default function ArcadeScene({ links }: { links: LinkItem[] }) {
   const [booted, setBooted] = useState(false);
   const [bootStep, setBootStep] = useState(0);
@@ -64,6 +93,7 @@ export default function ArcadeScene({ links }: { links: LinkItem[] }) {
   const [canPlay, setCanPlay] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [origin, setOrigin] = useState({ x: 0, y: 0 });
+  const [copied, setCopied] = useState(false);
   const itemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
 
   const blip = useCallback((cue: string) => play(cue, sfxOn), [sfxOn]);
@@ -195,6 +225,40 @@ export default function ArcadeScene({ links }: { links: LinkItem[] }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [move, booted, playing]);
 
+  const copyAddress = async () => {
+    let ok = false;
+    try {
+      await navigator.clipboard.writeText(SOL_ADDRESS);
+      ok = true;
+    } catch {
+      // Older browsers / non-secure contexts: fall back to a hidden textarea.
+      try {
+        const area = document.createElement("textarea");
+        area.value = SOL_ADDRESS;
+        area.setAttribute("readonly", "");
+        area.style.position = "fixed";
+        area.style.opacity = "0";
+        document.body.appendChild(area);
+        area.select();
+        ok = document.execCommand("copy");
+        document.body.removeChild(area);
+      } catch {
+        /* nothing more to try */
+      }
+    }
+    if (ok) {
+      setCopied(true);
+      blip("select");
+    }
+  };
+
+  // The confirmation flips back on its own.
+  useEffect(() => {
+    if (!copied) return;
+    const timer = setTimeout(() => setCopied(false), 1600);
+    return () => clearTimeout(timer);
+  }, [copied]);
+
   const startGame = (event: React.MouseEvent<HTMLDivElement>) => {
     if (!canPlay || playing || !booted) return;
     // Anything interactive keeps its normal behaviour; only dead space starts it.
@@ -287,6 +351,32 @@ export default function ArcadeScene({ links }: { links: LinkItem[] }) {
                 style={{ animation: "blink-step 0.9s steps(1, end) infinite" }}
               />
             </p>
+          </div>
+
+          {/* Copy the Solana address */}
+          <div className="-mt-2 flex flex-col items-center gap-3 sm:-mt-3">
+            <button
+              type="button"
+              onClick={copyAddress}
+              title="Copy Solana address"
+              aria-label="Copy Solana address"
+              className={`pixel-frame flex size-10 items-center justify-center transition-colors sm:size-12 ${
+                copied
+                  ? "bg-terminal/20 text-terminal"
+                  : "bg-slate/80 text-coin/80 hover:bg-coin/20 hover:text-coin"
+              }`}
+              style={{
+                ["--px-color" as string]: copied ? "var(--terminal)" : "#3a3a5c",
+              }}
+            >
+              {copied ? <CheckGlyph /> : <CopyGlyph />}
+            </button>
+            <span
+              aria-live="polite"
+              className="h-3 text-[8px] text-terminal sm:text-[9px]"
+            >
+              {copied ? "ADDRESS COPIED" : ""}
+            </span>
           </div>
 
           {/* Link grid — icon-only blocks, four per row at every width. */}
